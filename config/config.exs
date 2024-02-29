@@ -22,6 +22,9 @@ config :leitner, LeitnerWeb.Endpoint,
   pubsub_server: Leitner.PubSub,
   live_view: [signing_salt: "DJ+B2TL/"]
 
+config :leitner, Leitner.Repo,
+  migration_primary_key: [type: :uuid]
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails
