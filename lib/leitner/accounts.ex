@@ -27,6 +27,22 @@ defmodule Leitner.Accounts do
   end
 
   @doc """
+  Gets a user by username.
+
+  ## Examples
+
+      iex> get_user_by_username("adia.dev")
+      %User{}
+
+      iex> get_user_by_username("jujutsu kaisen")
+      nil
+
+  """
+  def get_user_by_username(username) when is_binary(username) do
+    Repo.get_by(User, username: username)
+  end
+
+  @doc """
   Gets a user by email and password.
 
   ## Examples
@@ -39,10 +55,15 @@ defmodule Leitner.Accounts do
 
   """
   def get_user_by_email_and_password(email, password)
+      when is_nil(email) or is_nil(password),
+      do: nil
+
+  def get_user_by_email_and_password(email, password)
       when is_binary(email) and is_binary(password) do
     user = Repo.get_by(User, email: email)
     if User.valid_password?(user, password), do: user
   end
+
 
   @doc """
   Gets a single user.
@@ -90,7 +111,11 @@ defmodule Leitner.Accounts do
 
   """
   def change_user_registration(%User{} = user, attrs \\ %{}) do
-    User.registration_changeset(user, attrs, hash_password: false, validate_email: true, validate_username: true)
+    User.registration_changeset(user, attrs,
+      hash_password: false,
+      validate_email: true,
+      validate_username: true
+    )
   end
 
   ## Settings
@@ -142,6 +167,25 @@ defmodule Leitner.Accounts do
   end
 
   @doc """
+  Emulates that the username will change without actually changing
+  it in the database.
+
+  ## Examples
+
+      iex> apply_user_username(user, "valid password", %{username: ...})
+      {:ok, %User{}}
+
+      iex> apply_user_username(user, "invalid password", %{username: ...})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def apply_user_username(user, attrs) do
+    user
+    |> User.username_changeset(attrs)
+    |> Ecto.Changeset.apply_action(:update)
+  end
+
+  @doc """
   Updates the user email using the given token.
 
   If the token matches, the user email is updated and the token is deleted.
@@ -157,6 +201,18 @@ defmodule Leitner.Accounts do
     else
       _ -> :error
     end
+  end
+
+  @doc """
+  Updates the user username using the given token.
+
+  If the token matches, the user username is updated and the token is deleted.
+  The confirmed_at date is also updated to the current time.
+  """
+  def update_user_username(user, username) do
+    user
+    |> User.username_changeset(%{username: username})
+    |> Repo.update()
   end
 
   defp user_email_multi(user, email, context) do
