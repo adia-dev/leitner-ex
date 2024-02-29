@@ -19,7 +19,7 @@ defmodule LeitnerWeb.UserSessionController do
   end
 
   defp create(conn, %{"user" => user_params}, info) do
-    %{"email_or_username" => email_or_username, "password" => password} = user_params
+    %{"email" => email_or_username, "password" => password} = user_params
 
     user = Accounts.get_user_by_email(email_or_username)
 

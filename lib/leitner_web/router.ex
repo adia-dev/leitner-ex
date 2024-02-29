@@ -19,6 +19,8 @@ defmodule LeitnerWeb.Router do
 
   scope "/", LeitnerWeb do
     pipe_through :browser
+
+    live "/cards", CardLive.Index, :index
   end
 
   # Other scopes may use custom stacks.
@@ -62,6 +64,12 @@ defmodule LeitnerWeb.Router do
   scope "/", LeitnerWeb do
     pipe_through [:browser, :require_authenticated_user]
     get "/", PageController, :home
+
+    live "/cards/new", CardLive.Index, :new
+    live "/cards/:id/edit", CardLive.Index, :edit
+
+    live "/cards/:id", CardLive.Show, :show
+    live "/cards/:id/show/edit", CardLive.Show, :edit
 
     live_session :require_authenticated_user,
       on_mount: [{LeitnerWeb.UserAuth, :ensure_authenticated}] do
