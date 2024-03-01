@@ -21,6 +21,14 @@ defmodule Leitner.Cards do
     Repo.all(Card)
   end
 
+  def list_cards_by_category do
+    query =
+      from c in Card,
+        order_by: [desc: c.category]
+
+    Repo.all(query)
+  end
+
   @doc """
   Gets a single card.
 
@@ -110,8 +118,8 @@ defmodule Leitner.Cards do
       nil ->
         {:error, :missing_mandatory_field_guess}
 
-      answer ->
-        if String.jaro_distance(card.answer, attrs.guess) >= opts[:distance_threshold] do
+      guess ->
+        if String.jaro_distance(card.answer, guess) >= opts[:distance_threshold] do
           case update_card(card, %{category: next_category}) do
             {:ok, updated_card} ->
               {:ok, updated_card}

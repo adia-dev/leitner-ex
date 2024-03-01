@@ -6,7 +6,7 @@ defmodule LeitnerWeb.CardLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, stream(socket, :cards, Cards.list_cards())}
+    {:ok, stream(socket, :cards, Cards.list_cards_by_category())}
   end
 
   @impl true
@@ -40,6 +40,11 @@ defmodule LeitnerWeb.CardLive.Index do
 
   @impl true
   def handle_info({LeitnerWeb.CardLive.FormComponent, {:saved, card}}, socket) do
+    {:noreply, stream_insert(socket, :cards, card)}
+  end
+
+  @impl true
+  def handle_info({LeitnerWeb.CardLive.AnswerComponent, {:answered, card}}, socket) do
     {:noreply, stream_insert(socket, :cards, card)}
   end
 
