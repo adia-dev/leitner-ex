@@ -83,7 +83,7 @@ defmodule Leitner.Cards do
 
     * `:distance_threshold` - Validate the answer based on the distance between the guess
       and the expected answer, this option can be set to `1.0` for exact match.
-      Defaults to `0.8`.
+      Defaults to `0.97`.
       Value must be between `0.0` and `1.0`
 
   ## Examples
@@ -93,35 +93,41 @@ defmodule Leitner.Cards do
       {:ok, %Card{}, category}
 
       iex> update_card(card, %{guess: "bad_answer"})
-      # The card has been updated to the next category
-      {:error, "wrong answer", maybe_good_answer, :first}
+      {:error, "wrong answer", maybe_good_answer}
+
+      iex> update_card(card, %{answer: "bad_answer"})
+      {:error, "Missing mandatory field :guess."}
 
   """
-  def answer_card(%Card{} = card, attrs, opts \\ [reveal: false, distance_threshold: 0.8])
+  def answer_card(%Card{} = card, attrs, opts \\ [reveal: false, distance_threshold: 0.97])
       when card.category === :done,
-      do: {:error, "This card has already been mastered"}
+      do: {:error, :already_mastered}
 
   def answer_card(%Card{} = card, attrs, opts) do
     {:ok, next_category} = Card.next_category(card)
-    dbg(next_category)
 
     case Map.get(attrs, :guess) do
       nil ->
-        {:error, "Missing mandatory field :guess.", card.category}
+        {:error, :missing_mandatory_field_guess}
 
       answer ->
         if String.jaro_distance(card.answer, attrs.guess) >= opts[:distance_threshold] do
-          card
-          |> Card.changeset(%{category: next_category})
-          |> Repo.update()
+          case update_card(card, %{category: next_category}) do
+            {:ok, updated_card} ->
+              {:ok, updated_card}
 
-          {:ok, "good answer", card.answer, next_category}
+            error ->
+              error
+          end
         else
-          card
-          |> Card.changeset(%{category: next_category})
-          |> Repo.update()
+          case update_card(card, %{category: :first}) do
+            {:ok, updated_card} ->
+              maybe_good_answer = if opts[:reveal], do: card.answer, else: nil
+              {:error, :wrong_answer, updated_card}
 
-          {:error, "wrong answer", card.answer, :first}
+            error ->
+              error
+          end
         end
     end
   end
