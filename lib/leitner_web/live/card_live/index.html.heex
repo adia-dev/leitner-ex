@@ -17,6 +17,9 @@
   <:col :let={{_id, card}} label="Answer"><%= card.answer %></:col>
   <:col :let={{_id, card}} label="Tag"><%= card.tag %></:col>
   <:action :let={{_id, card}}>
+    <.link navigate={~p"/cards/#{card}/answer"}>Answer</.link>
+  </:action>
+  <:action :let={{_id, card}}>
     <div class="sr-only">
       <.link navigate={~p"/cards/#{card}"}>Show</.link>
     </div>
@@ -35,6 +38,17 @@
 <.modal :if={@live_action in [:new, :edit]} id="card-modal" show on_cancel={JS.patch(~p"/cards")}>
   <.live_component
     module={LeitnerWeb.CardLive.FormComponent}
+    id={@card.id || :new}
+    title={@page_title}
+    action={@live_action}
+    card={@card}
+    patch={~p"/cards"}
+  />
+</.modal>
+
+<.modal :if={@live_action == :answer} id="card-modal" show on_cancel={JS.patch(~p"/cards")}>
+  <.live_component
+    module={LeitnerWeb.CardLive.AnswerComponent}
     id={@card.id || :new}
     title={@page_title}
     action={@live_action}

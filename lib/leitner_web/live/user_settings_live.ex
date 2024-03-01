@@ -167,7 +167,7 @@ defmodule LeitnerWeb.UserSettingsLive do
     user = socket.assigns.current_user
 
     case Accounts.update_user_username(user, username) do
-      {:ok, applied_user} ->
+      {:ok, _} ->
         info =
           "Your username has been modified, you will be able to log in with in during your next session."
 

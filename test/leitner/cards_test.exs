@@ -21,7 +21,12 @@ defmodule Leitner.CardsTest do
     end
 
     test "create_card/1 with valid data creates a card" do
-      valid_attrs = %{tag: "some tag", category: :first, question: "some question", answer: "some answer"}
+      valid_attrs = %{
+        tag: "some tag",
+        category: :first,
+        question: "some question",
+        answer: "some answer"
+      }
 
       assert {:ok, %Card{} = card} = Cards.create_card(valid_attrs)
       assert card.tag == "some tag"
@@ -36,7 +41,13 @@ defmodule Leitner.CardsTest do
 
     test "update_card/2 with valid data updates the card" do
       card = card_fixture()
-      update_attrs = %{tag: "some updated tag", category: :second, question: "some updated question", answer: "some updated answer"}
+
+      update_attrs = %{
+        tag: "some updated tag",
+        category: :second,
+        question: "some updated question",
+        answer: "some updated answer"
+      }
 
       assert {:ok, %Card{} = card} = Cards.update_card(card, update_attrs)
       assert card.tag == "some updated tag"
@@ -46,6 +57,12 @@ defmodule Leitner.CardsTest do
     end
 
     test "update_card/2 with invalid data returns error changeset" do
+      card = card_fixture()
+      assert {:error, %Ecto.Changeset{}} = Cards.update_card(card, @invalid_attrs)
+      assert card == Cards.get_card!(card.id)
+    end
+
+    test "answer_cards/3 with valid answer returns error changeset" do
       card = card_fixture()
       assert {:error, %Ecto.Changeset{}} = Cards.update_card(card, @invalid_attrs)
       assert card == Cards.get_card!(card.id)

@@ -38,7 +38,7 @@ defmodule Leitner.AccountsTest do
   describe "get_user!/1" do
     test "raises if id is invalid" do
       assert_raise Ecto.NoResultsError, fn ->
-        Accounts.get_user!(-1)
+        Accounts.get_user!("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
       end
     end
 
@@ -63,7 +63,7 @@ defmodule Leitner.AccountsTest do
 
       assert %{
                email: ["must have the @ sign and no spaces"],
-               password: ["should be at least 12 character(s)"]
+               password: ["at least one digit or punctuation character"]
              } = errors_on(changeset)
     end
 
@@ -97,7 +97,7 @@ defmodule Leitner.AccountsTest do
   describe "change_user_registration/2" do
     test "returns a changeset" do
       assert %Ecto.Changeset{} = changeset = Accounts.change_user_registration(%User{})
-      assert changeset.required == [:password, :email]
+      assert changeset.required == [:password, :email, :username]
     end
 
     test "allows fields to be set" do
@@ -245,11 +245,11 @@ defmodule Leitner.AccountsTest do
     test "allows fields to be set" do
       changeset =
         Accounts.change_user_password(%User{}, %{
-          "password" => "new valid password"
+          "password" => "Respons11!"
         })
 
       assert changeset.valid?
-      assert get_change(changeset, :password) == "new valid password"
+      assert get_change(changeset, :password) == "Respons11!"
       assert is_nil(get_change(changeset, :hashed_password))
     end
   end
@@ -262,12 +262,12 @@ defmodule Leitner.AccountsTest do
     test "validates password", %{user: user} do
       {:error, changeset} =
         Accounts.update_user_password(user, valid_user_password(), %{
-          password: "not valid",
+          password: "invalid password",
           password_confirmation: "another"
         })
 
       assert %{
-               password: ["should be at least 12 character(s)"],
+               password: ["at least one digit or punctuation character"],
                password_confirmation: ["does not match password"]
              } = errors_on(changeset)
     end
@@ -291,11 +291,11 @@ defmodule Leitner.AccountsTest do
     test "updates the password", %{user: user} do
       {:ok, user} =
         Accounts.update_user_password(user, valid_user_password(), %{
-          password: "new valid password"
+          password: "Respons11!"
         })
 
       assert is_nil(user.password)
-      assert Accounts.get_user_by_email_and_password(user.email, "new valid password")
+      assert Accounts.get_user_by_email_and_password(user.email, "Respons11!")
     end
 
     test "deletes all tokens for the given user", %{user: user} do
@@ -303,7 +303,7 @@ defmodule Leitner.AccountsTest do
 
       {:ok, _} =
         Accounts.update_user_password(user, valid_user_password(), %{
-          password: "new valid password"
+          password: "Respons11!"
         })
 
       refute Repo.get_by(UserToken, user_id: user.id)
@@ -476,7 +476,7 @@ defmodule Leitner.AccountsTest do
         })
 
       assert %{
-               password: ["should be at least 12 character(s)"],
+               password: ["at least one digit or punctuation character"],
                password_confirmation: ["does not match password"]
              } = errors_on(changeset)
     end
@@ -488,21 +488,21 @@ defmodule Leitner.AccountsTest do
     end
 
     test "updates the password", %{user: user} do
-      {:ok, updated_user} = Accounts.reset_user_password(user, %{password: "new valid password"})
+      {:ok, updated_user} = Accounts.reset_user_password(user, %{password: "Azerty11!"})
       assert is_nil(updated_user.password)
-      assert Accounts.get_user_by_email_and_password(user.email, "new valid password")
+      assert Accounts.get_user_by_email_and_password(user.email, "Azerty11!")
     end
 
     test "deletes all tokens for the given user", %{user: user} do
       _ = Accounts.generate_user_session_token(user)
-      {:ok, _} = Accounts.reset_user_password(user, %{password: "new valid password"})
+      {:ok, _} = Accounts.reset_user_password(user, %{password: "Azerty11!"})
       refute Repo.get_by(UserToken, user_id: user.id)
     end
   end
 
   describe "inspect/2 for the User module" do
     test "does not include password" do
-      refute inspect(%User{password: "123456"}) =~ "password: \"123456\""
+      refute inspect(%User{password: "Azerty11!"}) =~ "password: \"Azerty11!\""
     end
   end
 end

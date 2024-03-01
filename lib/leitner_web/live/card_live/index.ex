@@ -20,6 +20,12 @@ defmodule LeitnerWeb.CardLive.Index do
     |> assign(:card, Cards.get_card!(id))
   end
 
+  defp apply_action(socket, :answer, %{"id" => id}) do
+    socket
+    |> assign(:page_title, "Answer Card")
+    |> assign(:card, Cards.get_card!(id))
+  end
+
   defp apply_action(socket, :new, _params) do
     socket
     |> assign(:page_title, "New Card")

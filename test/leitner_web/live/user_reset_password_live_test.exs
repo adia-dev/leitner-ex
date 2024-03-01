@@ -32,20 +32,6 @@ defmodule LeitnerWeb.UserResetPasswordLiveTest do
                to: ~p"/"
              }
     end
-
-    test "renders errors for invalid data", %{conn: conn, token: token} do
-      {:ok, lv, _html} = live(conn, ~p"/users/reset_password/#{token}")
-
-      result =
-        lv
-        |> element("#reset_password_form")
-        |> render_change(
-          user: %{"password" => "secret12", "password_confirmation" => "secret123456"}
-        )
-
-      assert result =~ "should be at least 12 character"
-      assert result =~ "does not match password"
-    end
   end
 
   describe "Reset Password" do
@@ -56,8 +42,8 @@ defmodule LeitnerWeb.UserResetPasswordLiveTest do
         lv
         |> form("#reset_password_form",
           user: %{
-            "password" => "new valid password",
-            "password_confirmation" => "new valid password"
+            "password" => "Respons11!",
+            "password_confirmation" => "Respons11!"
           }
         )
         |> render_submit()
@@ -65,7 +51,7 @@ defmodule LeitnerWeb.UserResetPasswordLiveTest do
 
       refute get_session(conn, :user_token)
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Password reset successfully"
-      assert Accounts.get_user_by_email_and_password(user.email, "new valid password")
+      assert Accounts.get_user_by_email_and_password(user.email, "Respons11!")
     end
 
     test "does not reset password on invalid data", %{conn: conn, token: token} do
@@ -82,7 +68,7 @@ defmodule LeitnerWeb.UserResetPasswordLiveTest do
         |> render_submit()
 
       assert result =~ "Reset Password"
-      assert result =~ "should be at least 12 character(s)"
+      assert result =~ "at least one digit or punctuation character"
       assert result =~ "does not match password"
     end
   end

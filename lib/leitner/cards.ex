@@ -74,8 +74,60 @@ defmodule Leitner.Cards do
   end
 
   @doc """
-  Deletes a card.
+  Answer a card.
 
+  ## Options
+
+    * `:reveal` - Return the good answer, this option can be set to `false`.
+      Defaults to `true`.
+
+    * `:distance_threshold` - Validate the answer based on the distance between the guess
+      and the expected answer, this option can be set to `1.0` for exact match.
+      Defaults to `0.8`.
+      Value must be between `0.0` and `1.0`
+
+  ## Examples
+
+      # The card will be updated to the next category
+      iex> answer_card(card, %{guess: "good_answer"}, opts)
+      {:ok, %Card{}, category}
+
+      iex> update_card(card, %{guess: "bad_answer"})
+      # The card has been updated to the next category
+      {:error, "wrong answer", maybe_good_answer, :first}
+
+  """
+  def answer_card(%Card{} = card, attrs, opts \\ [reveal: false, distance_threshold: 0.8])
+      when card.category === :done,
+      do: {:error, "This card has already been mastered"}
+
+  def answer_card(%Card{} = card, attrs, opts) do
+    {:ok, next_category} = Card.next_category(card)
+    dbg(next_category)
+
+    case Map.get(attrs, :guess) do
+      nil ->
+        {:error, "Missing mandatory field :guess.", card.category}
+
+      answer ->
+        if String.jaro_distance(card.answer, attrs.guess) >= opts[:distance_threshold] do
+          card
+          |> Card.changeset(%{category: next_category})
+          |> Repo.update()
+
+          {:ok, "good answer", card.answer, next_category}
+        else
+          card
+          |> Card.changeset(%{category: next_category})
+          |> Repo.update()
+
+          {:error, "wrong answer", card.answer, :first}
+        end
+    end
+  end
+
+  @doc """
+  Deletes a card.
   ## Examples
 
       iex> delete_card(card)

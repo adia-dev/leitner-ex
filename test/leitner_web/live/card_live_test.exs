@@ -3,9 +3,20 @@ defmodule LeitnerWeb.CardLiveTest do
 
   import Phoenix.LiveViewTest
   import Leitner.CardsFixtures
+  import Leitner.AccountsFixtures
 
-  @create_attrs %{tag: "some tag", category: :first, question: "some question", answer: "some answer"}
-  @update_attrs %{tag: "some updated tag", category: :second, question: "some updated question", answer: "some updated answer"}
+  @create_attrs %{
+    tag: "some tag",
+    category: :first,
+    question: "some question",
+    answer: "some answer"
+  }
+  @update_attrs %{
+    tag: "some updated tag",
+    category: :second,
+    question: "some updated question",
+    answer: "some updated answer"
+  }
   @invalid_attrs %{tag: nil, category: nil, question: nil, answer: nil}
 
   defp create_card(_) do
@@ -17,14 +28,20 @@ defmodule LeitnerWeb.CardLiveTest do
     setup [:create_card]
 
     test "lists all cards", %{conn: conn, card: card} do
-      {:ok, _index_live, html} = live(conn, ~p"/cards")
+      {:ok, _index_live, html} =
+        conn
+        |> log_in_user(user_fixture())
+        |> live(~p"/cards")
 
       assert html =~ "Listing Cards"
       assert html =~ card.tag
     end
 
     test "saves new card", %{conn: conn} do
-      {:ok, index_live, _html} = live(conn, ~p"/cards")
+      {:ok, index_live, _html} =
+        conn
+        |> log_in_user(user_fixture())
+        |> live(~p"/cards")
 
       assert index_live |> element("a", "New Card") |> render_click() =~
                "New Card"
@@ -47,7 +64,10 @@ defmodule LeitnerWeb.CardLiveTest do
     end
 
     test "updates card in listing", %{conn: conn, card: card} do
-      {:ok, index_live, _html} = live(conn, ~p"/cards")
+      {:ok, index_live, _html} =
+        conn
+        |> log_in_user(user_fixture())
+        |> live(~p"/cards")
 
       assert index_live |> element("#cards-#{card.id} a", "Edit") |> render_click() =~
                "Edit Card"
@@ -70,7 +90,10 @@ defmodule LeitnerWeb.CardLiveTest do
     end
 
     test "deletes card in listing", %{conn: conn, card: card} do
-      {:ok, index_live, _html} = live(conn, ~p"/cards")
+      {:ok, index_live, _html} =
+        conn
+        |> log_in_user(user_fixture())
+        |> live(~p"/cards")
 
       assert index_live |> element("#cards-#{card.id} a", "Delete") |> render_click()
       refute has_element?(index_live, "#cards-#{card.id}")
@@ -81,14 +104,20 @@ defmodule LeitnerWeb.CardLiveTest do
     setup [:create_card]
 
     test "displays card", %{conn: conn, card: card} do
-      {:ok, _show_live, html} = live(conn, ~p"/cards/#{card}")
+      {:ok, _show_live, html} =
+        conn
+        |> log_in_user(user_fixture())
+        |> live(~p"/cards/#{card}")
 
       assert html =~ "Show Card"
       assert html =~ card.tag
     end
 
     test "updates card within modal", %{conn: conn, card: card} do
-      {:ok, show_live, _html} = live(conn, ~p"/cards/#{card}")
+      {:ok, show_live, _html} =
+        conn
+        |> log_in_user(user_fixture())
+        |> live(~p"/cards/#{card}")
 
       assert show_live |> element("a", "Edit") |> render_click() =~
                "Edit Card"

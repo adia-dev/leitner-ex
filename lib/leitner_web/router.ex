@@ -71,6 +71,8 @@ defmodule LeitnerWeb.Router do
     live "/cards/:id", CardLive.Show, :show
     live "/cards/:id/show/edit", CardLive.Show, :edit
 
+    live "/cards/:id/answer", CardLive.Index, :answer
+
     live_session :require_authenticated_user,
       on_mount: [{LeitnerWeb.UserAuth, :ensure_authenticated}] do
       live "/users/settings", UserSettingsLive, :edit

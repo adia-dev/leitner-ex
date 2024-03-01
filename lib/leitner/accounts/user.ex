@@ -52,7 +52,7 @@ defmodule Leitner.Accounts.User do
     changeset
     |> validate_required([:username])
     |> validate_format(:username, ~r/^[^\s]+$/, message: "must have no spaces")
-    |> validate_length(:username, max: 18)
+    |> validate_length(:username, max: 24)
     |> maybe_validate_unique_username(opts)
   end
 
