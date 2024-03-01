@@ -22,7 +22,7 @@ defmodule Leitner.Cards.Card do
   def changeset(card, attrs) do
     card
     |> cast(attrs, [:category, :question, :answer, :tag])
-    |> validate_required([:category, :question, :answer, :tag])
+    |> validate_required([:question, :answer])
   end
 
   def next_category(card) do

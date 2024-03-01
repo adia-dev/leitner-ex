@@ -20,4 +20,21 @@ defmodule Leitner.CardsFixtures do
 
     card
   end
+
+  @doc """
+  Generate a mastered card.
+  """
+  def mastered_card_fixture(attrs \\ %{}) do
+    {:ok, card} =
+      attrs
+      |> Enum.into(%{
+        answer: "some answer",
+        category: :done,
+        question: "some question",
+        tag: "some tag"
+      })
+      |> Leitner.Cards.create_card()
+
+    card
+  end
 end

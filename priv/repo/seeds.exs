@@ -11,6 +11,7 @@
 # and so on) as they will fail if something goes wrong.
 
 alias Leitner.Accounts
+alias Leitner.Cards
 
 password = "Respons11!"
 
@@ -21,15 +22,24 @@ Accounts.register_user(%{
 })
 
 Enum.each(1..10, fn i ->
-  case Accounts.register_user(%{
-         email: "adia.dev.#{i}@gmail.com",
-         username: "adia.dev.#{i}",
-         password: password
-       }) do
-    {:ok, user} ->
-      IO.inspect("User created: #{user.username}")
+  Accounts.register_user(%{
+    email: "adia.dev.#{i}@gmail.com",
+    username: "adia.dev.#{i}",
+    password: password
+  })
+end)
 
-    {:error, error} ->
-      IO.inspect("Failed to create user: #{error}")
-  end
+categories = [:first, :second, :third, :fourth, :fifth, :sixth, :seventh, :done]
+
+Enum.each(1..100, fn i ->
+  category = Enum.random(categories)
+  random_number = Enum.random(1..10)
+  answer = i * random_number
+
+  Cards.create_card(%{
+    question: "What is #{i} * #{random_number} ??",
+    answer: "#{answer}",
+    category: category,
+    tag: "maths,science,big brain,thinking,algebra"
+  })
 end)
