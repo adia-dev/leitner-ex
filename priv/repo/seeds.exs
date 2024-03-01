@@ -33,6 +33,7 @@ categories = [:first, :second, :third, :fourth, :fifth, :sixth, :seventh, :done]
 
 Enum.each(1..100, fn i ->
   category = Enum.random(categories)
+  random_tag = Enum.random(["maths", "science", "big brain", "thinking", "algebra"])
   random_number = Enum.random(1..10)
   answer = i * random_number
 
@@ -40,6 +41,6 @@ Enum.each(1..100, fn i ->
     question: "What is #{i} * #{random_number} ??",
     answer: "#{answer}",
     category: category,
-    tag: "maths,science,big brain,thinking,algebra"
+    tag: random_tag
   })
 end)

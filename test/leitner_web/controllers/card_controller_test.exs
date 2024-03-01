@@ -27,6 +27,16 @@ defmodule LeitnerWeb.CardControllerTest do
       conn = get(conn, ~p"/api/cards")
       assert json_response(conn, 200) == []
     end
+
+    test "lists all cards filtered by tags", %{conn: conn} do
+      conn = get(conn, ~p"/api/cards?tag=maths,algebra")
+      assert json_response(conn, 200) == []
+    end
+
+    test "lists all cards filtered by tags (array format)", %{conn: conn} do
+      conn = get(conn, ~p"/api/cards?tag[]=maths&tag[]=algebra")
+      assert json_response(conn, 200) == []
+    end
   end
 
   describe "create card" do
@@ -42,7 +52,6 @@ defmodule LeitnerWeb.CardControllerTest do
         category
         |> Atom.to_string()
         |> String.upcase()
-
 
       assert %{
                "id" => ^id,

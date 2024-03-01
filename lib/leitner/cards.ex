@@ -21,6 +21,16 @@ defmodule Leitner.Cards do
     Repo.all(Card)
   end
 
+  def list_cards_by_tags(tags) when not is_list(tags), do: []
+
+  def list_cards_by_tags(tags) do
+    query =
+      from c in Card,
+        where: c.tag in ^tags
+
+    Repo.all(query)
+  end
+
   @doc """
   Gets a single card.
 

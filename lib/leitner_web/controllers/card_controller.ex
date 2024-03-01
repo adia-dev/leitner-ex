@@ -6,8 +6,19 @@ defmodule LeitnerWeb.CardController do
 
   action_fallback LeitnerWeb.FallbackController
 
-  def index(conn, _params) do
-    cards = Cards.list_cards()
+  def index(conn, %{"tag" => tag}) when is_bitstring(tag),
+    do: index(conn, %{"tag" => String.split(tag, ",")})
+
+  def index(conn, params) do
+    cards =
+      case Map.get(params, "tag") do
+        nil ->
+          Cards.list_cards()
+
+        tags ->
+          Cards.list_cards_by_tags(tags)
+      end
+
     render(conn, :index, cards: cards)
   end
 
