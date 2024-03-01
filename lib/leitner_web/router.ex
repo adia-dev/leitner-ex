@@ -27,6 +27,7 @@ defmodule LeitnerWeb.Router do
   scope "/api", LeitnerWeb do
     pipe_through :api
     resources "/cards", CardController, except: [:new, :edit]
+    put "/cards/:id/answer", CardController, :answer
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

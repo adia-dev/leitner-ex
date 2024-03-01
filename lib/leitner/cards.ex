@@ -130,14 +130,14 @@ defmodule Leitner.Cards do
       do: {:error, :already_mastered}
 
   def answer_card(%Card{} = card, attrs, opts) do
-    {:ok, next_category} = Card.next_category(card)
+    next_category = Card.next_category(card)
 
     case Map.get(attrs, :guess) do
       nil ->
         {:error, :missing_mandatory_field_guess}
 
-      answer ->
-        if String.jaro_distance(card.answer, attrs.guess) >= opts[:distance_threshold] do
+      guess ->
+        if String.jaro_distance(card.answer, guess) >= opts[:distance_threshold] do
           case update_card(card, %{category: next_category}) do
             {:ok, updated_card} ->
               {:ok, updated_card}

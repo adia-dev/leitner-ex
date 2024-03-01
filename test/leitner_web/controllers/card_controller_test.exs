@@ -12,8 +12,18 @@ defmodule LeitnerWeb.CardControllerTest do
     answer: "some answer"
   }
 
+  @non_existing_card_id "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+
   @update_attrs %{
     question: "some updated question"
+  }
+
+  @valid_guess %{
+    isValid: true
+  }
+
+  @invalid_guess %{
+    isInvalid: true
   }
 
   @invalid_attrs %{tag: nil, category: nil, question: nil, answer: nil}
@@ -92,6 +102,34 @@ defmodule LeitnerWeb.CardControllerTest do
                "category" => ^category,
                "question" => "some updated question"
              } = json_response(conn, 200)
+    end
+  end
+
+  describe "answer card" do
+    setup [:create_card]
+
+    test "answer a card with a valid guess returns 204 no content", %{
+      conn: conn,
+      card: %Card{} = card
+    } do
+      conn = put(conn, ~p"/api/cards/#{card}/answer", @valid_guess)
+      assert response(conn, 204)
+    end
+
+    test "answer a card with a invalid guess returns a bad request", %{
+      conn: conn,
+      card: %Card{} = card
+    } do
+      conn = put(conn, ~p"/api/cards/#{card}/answer", @invalid_guess)
+      assert response(conn, 400)
+    end
+
+    test "answer a card with a non existing card returns 404 not found", %{
+      conn: conn,
+      card: %Card{} = card
+    } do
+      conn = put(conn, ~p"/api/cards/#{@non_existing_card_id}/answer", @valid_guess)
+      assert response(conn, 404)
     end
   end
 

@@ -47,7 +47,7 @@ defmodule LeitnerWeb.CardController do
   def delete(conn, %{"id" => id}) do
     case Cards.get_card(id) do
       nil ->
-        send_resp(conn, :not_found, "No card record found related with the id: #{id}")
+        send_resp(conn, :not_found, "No card found related with the id: #{id}")
 
       card ->
         with {:ok, %Card{}} <- Cards.delete_card(card) do
@@ -55,4 +55,25 @@ defmodule LeitnerWeb.CardController do
         end
     end
   end
+
+  def answer(conn, %{"id" => id, "isValid" => _is_valid}) do
+    case Cards.get_card(id) do
+      nil ->
+        send_resp(conn, :not_found, "No card found related with the id: #{id}")
+
+      card ->
+        next_category = Card.next_category(card)
+
+        case Cards.update_card(card, %{category: next_category}) do
+          {:ok, _card} ->
+            send_resp(conn, :no_content, "")
+
+          {:error, _} ->
+            send_resp(conn, :internal_server_error, "")
+        end
+    end
+  end
+
+  def answer(conn, _params),
+    do: send_resp(conn, :bad_request, "Incorrect request payload")
 end
