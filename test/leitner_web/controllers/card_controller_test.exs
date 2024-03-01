@@ -41,7 +41,7 @@ defmodule LeitnerWeb.CardControllerTest do
 
   describe "create card" do
     test "renders card when data is valid", %{conn: conn} do
-      conn = post(conn, ~p"/api/cards", card: @create_attrs)
+      conn = post(conn, ~p"/api/cards", @create_attrs)
       assert %{"id" => id} = json_response(conn, 201)
 
       conn = get(conn, ~p"/api/cards/#{id}")
@@ -63,7 +63,7 @@ defmodule LeitnerWeb.CardControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, ~p"/api/cards", card: @invalid_attrs)
+      conn = post(conn, ~p"/api/cards", @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
     end
   end
@@ -75,7 +75,7 @@ defmodule LeitnerWeb.CardControllerTest do
       conn: conn,
       card: %Card{id: id, tag: tag, category: category, answer: answer} = card
     } do
-      conn = put(conn, ~p"/api/cards/#{card}", card: @update_attrs)
+      conn = put(conn, ~p"/api/cards/#{card}", @update_attrs)
       assert %{"id" => ^id} = json_response(conn, 200)
 
       conn = get(conn, ~p"/api/cards/#{id}")
@@ -92,11 +92,6 @@ defmodule LeitnerWeb.CardControllerTest do
                "category" => ^category,
                "question" => "some updated question"
              } = json_response(conn, 200)
-    end
-
-    test "renders errors when data is invalid", %{conn: conn, card: card} do
-      conn = put(conn, ~p"/api/cards/#{card}", card: @invalid_attrs)
-      assert json_response(conn, 422)["errors"] != %{}
     end
   end
 

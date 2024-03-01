@@ -48,12 +48,28 @@ defmodule Leitner.Cards do
   def get_card!(id), do: Repo.get!(Card, id)
 
   @doc """
+  Gets a single card.
+
+  Returns a record of nil if not found
+
+  ## Examples
+
+      iex> get_card!(123)
+      {:ok, %Card{}}
+
+      iex> get_card!(456)
+      nil
+
+  """
+  def get_card(id), do: Repo.get(Card, id)
+
+  @doc """
   Creates a card.
 
   ## Examples
 
       iex> create_card(%{field: value})
-      {:ok, %Card{}}
+      %Card{}
 
       iex> create_card(%{field: bad_value})
       {:error, %Ecto.Changeset{}}

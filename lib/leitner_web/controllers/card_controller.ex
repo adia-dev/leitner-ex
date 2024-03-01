@@ -22,7 +22,7 @@ defmodule LeitnerWeb.CardController do
     render(conn, :index, cards: cards)
   end
 
-  def create(conn, %{"card" => card_params}) do
+  def create(conn, card_params) do
     with {:ok, %Card{} = card} <- Cards.create_card(card_params) do
       conn
       |> put_status(:created)
@@ -36,7 +36,7 @@ defmodule LeitnerWeb.CardController do
     render(conn, :show, card: card)
   end
 
-  def update(conn, %{"id" => id, "card" => card_params}) do
+  def update(conn, %{"id" => id} = card_params) do
     card = Cards.get_card!(id)
 
     with {:ok, %Card{} = card} <- Cards.update_card(card, card_params) do
@@ -45,10 +45,14 @@ defmodule LeitnerWeb.CardController do
   end
 
   def delete(conn, %{"id" => id}) do
-    card = Cards.get_card!(id)
+    case Cards.get_card(id) do
+      nil ->
+        send_resp(conn, :not_found, "No card record found related with the id: #{id}")
 
-    with {:ok, %Card{}} <- Cards.delete_card(card) do
-      send_resp(conn, :no_content, "")
+      card ->
+        with {:ok, %Card{}} <- Cards.delete_card(card) do
+          send_resp(conn, :no_content, "")
+        end
     end
   end
 end
