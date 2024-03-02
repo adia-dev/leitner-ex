@@ -2,6 +2,7 @@ defmodule LeitnerWeb.CardController do
   use LeitnerWeb, :controller
   use OpenApiSpex.ControllerSpecs
 
+  alias LeitnerWeb.Schemas.CardAnswerRequest
   alias OpenApiSpex.Schema
   alias LeitnerWeb.Schemas.CardUpdateRequest
   alias LeitnerWeb.Schemas.CardCreateRequest
@@ -56,7 +57,7 @@ defmodule LeitnerWeb.CardController do
     with {:ok, %Card{} = card} <- Cards.create_card(card_params) do
       conn
       |> put_status(:created)
-      |> put_resp_header("location", ~p"/api/cards/#{card}")
+      |> put_resp_header("location", ~p"/cards/#{card}")
       |> render(:show, card: card)
     end
   end
@@ -132,7 +133,7 @@ defmodule LeitnerWeb.CardController do
         send_resp(conn, :not_found, "No card found related with the id: #{id}")
 
       card ->
-        with {:ok, %Card{}} <- Cards.delete_card(card) do
+        with {:ok, _} <- Cards.delete_card(card) do
           send_resp(conn, :no_content, "")
         end
     end
@@ -149,9 +150,9 @@ defmodule LeitnerWeb.CardController do
         type: :string,
         required: true,
         example: "123e4567-e89b-12d3-a456-426614174000"
-      ],
-      isValid: [in: :query, description: "Validity of the answer", type: :boolean, required: true]
+      ]
     ],
+    request_body: {"Card answer parameters", "application/json", CardAnswerRequest},
     responses: [
       no_content: "Card category updated successfully",
       not_found: {"Error message", "application/json", nil},

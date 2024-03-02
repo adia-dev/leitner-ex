@@ -60,7 +60,9 @@ defmodule Leitner.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.2"},
       {:credo, "~> 1.6", only: [:test, :dev], runtime: false},
-      {:open_api_spex, "~> 3.18"}
+      {:open_api_spex, "~> 3.18"},
+      {:httpoison, "~> 2.0"},
+      {:poison, "~> 5.0"}
     ]
   end
 

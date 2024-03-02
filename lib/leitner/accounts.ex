@@ -81,6 +81,17 @@ defmodule Leitner.Accounts do
   """
   def get_user!(id), do: Repo.get!(User, id)
 
+  @doc """
+  List all users.
+
+  ## Examples
+
+      iex> list_users()
+      [%User{...}]
+
+  """
+  def list_users(), do: Repo.all(User)
+
   ## User registration
 
   @doc """

@@ -14,6 +14,8 @@ defmodule Leitner.Cards.Card do
 
     field :question, :string
     field :answer, :string
+    
+    many_to_many :users, Leitner.Accounts.User, join_through: "user_cards"
 
     timestamps(type: :utc_datetime)
   end

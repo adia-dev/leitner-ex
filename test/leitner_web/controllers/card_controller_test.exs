@@ -108,27 +108,27 @@ defmodule LeitnerWeb.CardControllerTest do
   describe "answer card" do
     setup [:create_card]
 
-    test "answer a card with a valid guess returns 204 no content", %{
+    test "valid guess returns 204 no content", %{
       conn: conn,
       card: %Card{} = card
     } do
-      conn = put(conn, ~p"/api/cards/#{card}/answer", @valid_guess)
+      conn = patch(conn, ~p"/api/cards/#{card}/answer", @valid_guess)
       assert response(conn, 204)
     end
 
-    test "answer a card with a invalid guess returns a bad request", %{
+    test "invalid guess returns a bad request", %{
       conn: conn,
       card: %Card{} = card
     } do
-      conn = put(conn, ~p"/api/cards/#{card}/answer", @invalid_guess)
+      conn = patch(conn, ~p"/api/cards/#{card}/answer", @invalid_guess)
       assert response(conn, 400)
     end
 
-    test "answer a card with a non existing card returns 404 not found", %{
+    test "non existing card returns 404 not found", %{
       conn: conn,
       card: %Card{} = card
     } do
-      conn = put(conn, ~p"/api/cards/#{@non_existing_card_id}/answer", @valid_guess)
+      conn = patch(conn, ~p"/api/cards/#{@non_existing_card_id}/answer", @valid_guess)
       assert response(conn, 404)
     end
   end
