@@ -140,9 +140,8 @@ defmodule LeitnerWeb.CardControllerTest do
       conn = delete(conn, ~p"/api/cards/#{card}")
       assert response(conn, 204)
 
-      assert_error_sent 404, fn ->
-        get(conn, ~p"/api/cards/#{card}")
-      end
+      conn = delete(conn, ~p"/api/cards/#{card}")
+      assert response(conn, 404)
     end
   end
 
