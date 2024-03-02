@@ -51,8 +51,6 @@ defmodule LeitnerWeb.CardLive.AnswerComponent do
 
   @impl true
   def handle_event("validate", %{"card" => card_params}, socket) do
-    dbg(card_params)
-
     changeset =
       socket.assigns.card
       |> Cards.change_card(card_params)

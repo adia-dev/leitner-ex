@@ -140,7 +140,7 @@ defmodule Leitner.Cards do
       do: {:error, :already_mastered}
 
   def answer_card(%Card{} = card, attrs, opts) do
-    next_category = Card.next_category(card)
+    next_category = Card.next_category(card.category)
 
     case Map.get(attrs, :guess) do
       nil ->

@@ -166,7 +166,7 @@ defmodule LeitnerWeb.CardController do
         send_resp(conn, :not_found, "No card found related with the id: #{id}")
 
       card ->
-        next_category = Card.next_category(card)
+        next_category = Card.next_category(card.category)
 
         case Cards.update_card(card, %{category: next_category}) do
           {:ok, _card} ->

@@ -14,7 +14,7 @@ defmodule Leitner.Cards.Card do
 
     field :question, :string
     field :answer, :string
-    
+
     many_to_many :users, Leitner.Accounts.User, join_through: "user_cards"
 
     timestamps(type: :utc_datetime)
@@ -27,14 +27,17 @@ defmodule Leitner.Cards.Card do
     |> validate_required([:question, :answer])
   end
 
-  def next_category(%Leitner.Cards.Card{category: category} = _card) do
-    case category do
-      :done ->
-        :done
+  def next_category(:done), do: :done
 
-      _ ->
-        current = Enum.find_index(@categories, &(&1 == category))
-        Enum.at(@categories, current + 1)
-    end
+  def next_category(category) when is_atom(category) do
+    current = Enum.find_index(@categories, &(&1 == category))
+    Enum.at(@categories, current + 1)
+  end
+
+  def next_category(category) do
+    category
+    |> String.downcase()
+    |> String.to_atom()
+    |> next_category()
   end
 end
