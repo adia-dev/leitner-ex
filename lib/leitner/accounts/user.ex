@@ -14,6 +14,8 @@ defmodule Leitner.Accounts.User do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
 
+    many_to_many :cards, Leitner.Cards.Card, join_through: "user_cards"
+
     timestamps(type: :utc_datetime)
   end
 

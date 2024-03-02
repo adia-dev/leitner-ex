@@ -14,6 +14,8 @@ defmodule Leitner.Cards.Card do
 
     field :question, :string
     field :answer, :string
+    
+    many_to_many :users, Leitner.Accounts.User, join_through: "user_cards"
 
     timestamps(type: :utc_datetime)
   end
@@ -25,14 +27,14 @@ defmodule Leitner.Cards.Card do
     |> validate_required([:question, :answer])
   end
 
-  def next_category(card) do
-    case card.category do
+  def next_category(%Leitner.Cards.Card{category: category} = _card) do
+    case category do
       :done ->
-        {:error, "This card has already been mastered"}
+        :done
 
       _ ->
-        current = Enum.find_index(@categories, &(&1 == card.category))
-        {:ok, Enum.at(@categories, current + 1)}
+        current = Enum.find_index(@categories, &(&1 == category))
+        Enum.at(@categories, current + 1)
     end
   end
 end

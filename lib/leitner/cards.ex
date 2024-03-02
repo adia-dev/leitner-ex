@@ -8,6 +8,8 @@ defmodule Leitner.Cards do
 
   alias Leitner.Cards.Card
 
+  @categories [:first, :second, :third, :fourth, :fifth, :sixth, :seventh, :done]
+
   @doc """
   Returns the list of cards.
 
@@ -29,6 +31,16 @@ defmodule Leitner.Cards do
     Repo.all(query)
   end
 
+  def list_cards_by_tags(tags) when not is_list(tags), do: []
+
+  def list_cards_by_tags(tags) do
+    query =
+      from c in Card,
+        where: c.tag in ^tags
+
+    Repo.all(query)
+  end
+
   @doc """
   Gets a single card.
 
@@ -46,12 +58,28 @@ defmodule Leitner.Cards do
   def get_card!(id), do: Repo.get!(Card, id)
 
   @doc """
+  Gets a single card.
+
+  Returns a record of nil if not found
+
+  ## Examples
+
+      iex> get_card!(123)
+      {:ok, %Card{}}
+
+      iex> get_card!(456)
+      nil
+
+  """
+  def get_card(id), do: Repo.get(Card, id)
+
+  @doc """
   Creates a card.
 
   ## Examples
 
       iex> create_card(%{field: value})
-      {:ok, %Card{}}
+      %Card{}
 
       iex> create_card(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
@@ -112,7 +140,7 @@ defmodule Leitner.Cards do
       do: {:error, :already_mastered}
 
   def answer_card(%Card{} = card, attrs, opts) do
-    {:ok, next_category} = Card.next_category(card)
+    next_category = Card.next_category(card)
 
     case Map.get(attrs, :guess) do
       nil ->
@@ -166,5 +194,86 @@ defmodule Leitner.Cards do
   """
   def change_card(%Card{} = card, attrs \\ %{}) do
     Card.changeset(card, attrs)
+  end
+
+  def add_card_to_user(user_id, card_id) do
+    %Leitner.User.Cards.UserCard{}
+    |> Leitner.User.Cards.UserCard.changeset(%{user_id: user_id, card_id: card_id})
+    |> Leitner.Repo.insert()
+  end
+
+  def update_card_review(user_id, card_id, correct) do
+    query =
+      from uc in Leitner.User.Cards.UserCard,
+        where: uc.user_id == ^user_id and uc.card_id == ^card_id,
+        preload: [:user, :card]
+
+    Repo.one(query)
+    |> case do
+      nil ->
+        {:error, :not_found}
+
+      %Leitner.User.Cards.UserCard{} = user_card ->
+        new_category = determine_new_category(user_card.card.category, correct)
+        next_review_at = determine_next_review_date(determine_category_index(new_category))
+
+        changes = %{
+          category: new_category,
+          last_review_at: DateTime.utc_now(),
+          next_review_at: next_review_at
+        }
+
+        user_card
+        |> Leitner.User.Cards.UserCard.changeset(changes)
+        |> Leitner.Repo.update()
+    end
+  end
+
+  defp determine_new_category(current_category, true) do
+    case current_category do
+      :done ->
+        :done
+
+      _ ->
+        current = Enum.find_index(@categories, &(&1 == current_category))
+        Enum.at(@categories, current + 1)
+    end
+  end
+
+  defp determine_new_category(_, false), do: :first
+
+  defp determine_category_index(category), do: Enum.find_index(@categories, &(&1 == category))
+
+  defp determine_next_review_date(category) do
+    DateTime.add(
+      DateTime.utc_now(),
+      Enum.reduce(0..(category + 1), 0, fn _, acc -> acc * 2 end),
+      :day
+    )
+  end
+
+  def remove_mastered_card(user_card_id) do
+    user_card_id
+    |> Leitner.Repo.get!(Leitner.User.Cards.UserCard)
+    |> Leitner.Repo.delete()
+  end
+
+  def list_user_cards(user_id) do
+    query =
+      from uc in Leitner.User.Cards.UserCard,
+        where: uc.user_id == ^user_id,
+        preload: [:card]
+
+    Leitner.Repo.all(query)
+  end
+
+  def list_cards_for_review(user_id) do
+    query =
+      from uc in Leitner.User.Cards.UserCard,
+        where: uc.user_id == ^user_id,
+        where: uc.next_review_at <= ^DateTime.utc_now(),
+        preload: [:card]
+
+    Leitner.Repo.all(query)
   end
 end

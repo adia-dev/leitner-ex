@@ -25,6 +25,12 @@ config :leitner, LeitnerWeb.Endpoint,
 config :leitner, Leitner.Repo,
   migration_primary_key: [type: :uuid]
 
+config :leitner, :generators,
+  migration: true,
+  binary_id: true,
+  timestamp_type: :naive_datetime,
+  sample_binary_id: "11111111-1111-1111-1111-111111111111"
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails

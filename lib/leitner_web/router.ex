@@ -15,25 +15,32 @@ defmodule LeitnerWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug OpenApiSpex.Plug.PutApiSpec, module: LeitnerWeb.ApiSpec
   end
 
-  scope "/", LeitnerWeb do
+  scope "/" do
     pipe_through :browser
 
-    live "/cards", CardLive.Index, :index
+    live "/cards", LeitnerWeb.CardLive.Index, :index
+
+    get "/swaggerui", OpenApiSpex.Plug.SwaggerUI, path: "/api/openapi"
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", LeitnerWeb do
-  #   pipe_through :api
-  # end
+  scope "/api" do
+    pipe_through :api
+    resources "/cards", LeitnerWeb.CardController, except: [:new, :edit]
+    patch "/cards/:id/answer", LeitnerWeb.CardController, :answer
+
+    get "/openapi", OpenApiSpex.Plug.RenderSpec, []
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:leitner, :dev_routes) do
     # If you want to use the LiveDashboard in production, you should put
     # it behind authentication and allow only admins to access it.
     # If your application does not have an admins-only section yet,
-    # you can use Plug.BasicAuth to set up some basic authentication
+    # you can use Plug.BasicAuth to set up some basic authenticatioN
     # as long as you are also using SSL (which you should anyway).
     import Phoenix.LiveDashboard.Router
 
