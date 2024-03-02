@@ -244,4 +244,17 @@ defmodule LeitnerWeb.Schemas do
       }
     })
   end
+
+  defmodule CardAnswerRequest do
+    require OpenApiSpex
+
+    OpenApiSpex.schema(%{
+      title: "CardAnswerRequest",
+      description: "Schema for card answer request",
+      type: :object,
+      properties: %{
+        isValid: %Schema{type: :boolean, description: "Validity of the answer"}
+      }
+    })
+  end
 end

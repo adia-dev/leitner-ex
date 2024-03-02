@@ -1,12 +1,36 @@
 defmodule LeitnerWeb.CardLive.Index do
+  alias LeitnerWeb.Clients.Cards.ApiClient
   use LeitnerWeb, :live_view
 
   alias Leitner.Cards
   alias Leitner.Cards.Card
 
   @impl true
+  def mount(%{"tag" => tags}, session, socket) when is_list(tags) do
+    tag = Enum.join(tags, ",")
+    mount(%{"tag" => tag}, session, socket)
+  end
+
+  @impl true
+  def mount(%{"tag" => tag}, _session, socket) when is_bitstring(tag) do
+    case ApiClient.list_cards(tag) do
+      {:ok, cards} ->
+        {:ok, stream(socket, :cards, cards)}
+
+      {:error, _reason} ->
+        {:ok, stream(socket, :cards, [])}
+    end
+  end
+
+  @impl true
   def mount(_params, _session, socket) do
-    {:ok, stream(socket, :cards, Cards.list_cards())}
+    case ApiClient.list_cards() do
+      {:ok, cards} ->
+        {:ok, stream(socket, :cards, cards)}
+
+      {:error, _reason} ->
+        {:ok, stream(socket, :cards, [])}
+    end
   end
 
   @impl true
@@ -17,13 +41,13 @@ defmodule LeitnerWeb.CardLive.Index do
   defp apply_action(socket, :edit, %{"id" => id}) do
     socket
     |> assign(:page_title, "Edit Card")
-    |> assign(:card, Cards.get_card!(id))
+    |> assign(:card, ApiClient.get_card!(id))
   end
 
   defp apply_action(socket, :answer, %{"id" => id}) do
     socket
     |> assign(:page_title, "Answer Card")
-    |> assign(:card, Cards.get_card!(id))
+    |> assign(:card, ApiClient.get_card!(id))
   end
 
   defp apply_action(socket, :new, _params) do
@@ -44,9 +68,14 @@ defmodule LeitnerWeb.CardLive.Index do
   end
 
   @impl true
+  def handle_info({LeitnerWeb.CardLive.AnswerComponent, {:answered, card}}, socket) do
+    {:noreply, stream_insert(socket, :cards, card)}
+  end
+
+  @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    card = Cards.get_card!(id)
-    {:ok, _} = Cards.delete_card(card)
+    card = ApiClient.get_card!(id)
+    {:ok, _} = ApiClient.delete_card(card.id)
 
     {:noreply, stream_delete(socket, :cards, card)}
   end

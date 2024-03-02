@@ -30,17 +30,22 @@ Enum.each(1..10, fn i ->
 end)
 
 categories = [:first, :second, :third, :fourth, :fifth, :sixth, :seventh, :done]
+all_users = Accounts.list_users()
 
-Enum.each(1..100, fn i ->
+Enum.each(1..10, fn i ->
   category = Enum.random(categories)
   random_tag = Enum.random(["maths", "science", "big brain", "thinking", "algebra"])
   random_number = Enum.random(1..10)
+  random_user = Enum.random(all_users)
   answer = i * random_number
 
-  Cards.create_card(%{
-    question: "What is #{i} * #{random_number} ??",
-    answer: "#{answer}",
-    category: category,
-    tag: random_tag
-  })
+  {:ok, card} =
+    Cards.create_card(%{
+      question: "What is #{i} * #{random_number} ??",
+      answer: "#{answer}",
+      category: category,
+      tag: random_tag
+    })
+
+  Cards.add_card_to_user(random_user.id, card.id)
 end)
