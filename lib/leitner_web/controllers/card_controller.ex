@@ -18,7 +18,7 @@ defmodule LeitnerWeb.CardController do
     summary: "List cards",
     description: "Fetches a list of cards, optionally filtered by tags",
     parameters: [
-      tag: [
+      tags: [
         in: :query,
         description: "Comma-separated list of tags to filter by",
         type: :string,
@@ -29,12 +29,12 @@ defmodule LeitnerWeb.CardController do
       ok: {"List of cards", "application/json", [CardResponse]}
     ]
 
-  def index(conn, %{"tag" => tag}) when is_bitstring(tag),
-    do: index(conn, %{"tag" => String.split(tag, ",")})
+  def index(conn, %{"tags" => tags}) when is_bitstring(tags),
+    do: index(conn, %{"tags" => String.split(tags, ",")})
 
   def index(conn, params) do
     cards =
-      case Map.get(params, "tag") do
+      case Map.get(params, "tags") do
         nil ->
           Cards.list_cards()
 
@@ -80,8 +80,13 @@ defmodule LeitnerWeb.CardController do
     ]
 
   def show(conn, %{"id" => id}) do
-    card = Cards.get_card!(id)
-    render(conn, :show, card: card)
+    case Cards.get_card(id) do
+      nil ->
+        send_resp(conn, :not_found, "No card found related with the id: #{id}")
+
+      card ->
+        render(conn, :show, card: card)
+    end
   end
 
   operation :update,

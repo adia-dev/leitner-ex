@@ -6,14 +6,14 @@ defmodule LeitnerWeb.CardLive.Index do
   alias Leitner.Cards.Card
 
   @impl true
-  def mount(%{"tag" => tags}, session, socket) when is_list(tags) do
-    tag = Enum.join(tags, ",")
-    mount(%{"tag" => tag}, session, socket)
+  def mount(%{"tags" => tags}, session, socket) when is_list(tags) do
+    tags = Enum.join(tags, ",")
+    mount(%{"tags" => tags}, session, socket)
   end
 
   @impl true
-  def mount(%{"tag" => tag}, _session, socket) when is_bitstring(tag) do
-    case ApiClient.list_cards(tag) do
+  def mount(%{"tags" => tags}, _session, socket) when is_bitstring(tags) do
+    case ApiClient.list_cards(tags) do
       {:ok, cards} ->
         {:ok, stream(socket, :cards, cards)}
 
