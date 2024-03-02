@@ -1,10 +1,32 @@
 defmodule LeitnerWeb.CardController do
   use LeitnerWeb, :controller
+  use OpenApiSpex.ControllerSpecs
 
+  alias OpenApiSpex.Schema
+  alias LeitnerWeb.Schemas.CardUpdateRequest
+  alias LeitnerWeb.Schemas.CardCreateRequest
+  alias LeitnerWeb.Schemas.CardResponse
   alias Leitner.Cards
   alias Leitner.Cards.Card
 
   action_fallback LeitnerWeb.FallbackController
+
+  tags ["Cards"]
+
+  operation :index,
+    summary: "List cards",
+    description: "Fetches a list of cards, optionally filtered by tags",
+    parameters: [
+      tag: [
+        in: :query,
+        description: "Comma-separated list of tags to filter by",
+        type: :string,
+        required: false
+      ]
+    ],
+    responses: [
+      ok: {"List of cards", "application/json", [CardResponse]}
+    ]
 
   def index(conn, %{"tag" => tag}) when is_bitstring(tag),
     do: index(conn, %{"tag" => String.split(tag, ",")})
@@ -22,6 +44,14 @@ defmodule LeitnerWeb.CardController do
     render(conn, :index, cards: cards)
   end
 
+  operation :create,
+    summary: "Create a new card",
+    description: "Creates a new card with the given parameters",
+    request_body: {"Card parameters", "application/json", CardCreateRequest},
+    responses: [
+      created: {"Card created", "application/json", CardResponse}
+    ]
+
   def create(conn, card_params) do
     with {:ok, %Card{} = card} <- Cards.create_card(card_params) do
       conn
@@ -31,10 +61,45 @@ defmodule LeitnerWeb.CardController do
     end
   end
 
+  operation :show,
+    summary: "Get a single card",
+    description: "Fetches a single card by its ID",
+    parameters: [
+      id: [
+        in: :path,
+        description: "Card ID",
+        type: :string,
+        required: true,
+        example: "123e4567-e89b-12d3-a456-426614174000"
+      ]
+    ],
+    responses: [
+      ok: {"Card details", "application/json", CardResponse},
+      not_found: {"Error message", "application/json", nil}
+    ]
+
   def show(conn, %{"id" => id}) do
     card = Cards.get_card!(id)
     render(conn, :show, card: card)
   end
+
+  operation :update,
+    summary: "Update a card",
+    description: "Updates a card's information by its ID",
+    parameters: [
+      id: [
+        in: :path,
+        description: "Card ID",
+        type: :string,
+        required: true,
+        example: "123e4567-e89b-12d3-a456-426614174000"
+      ]
+    ],
+    request_body: {"Card update parameters", "application/json", CardUpdateRequest},
+    responses: [
+      ok: {"Updated card", "application/json", CardResponse},
+      not_found: {"Error message", "application/json", nil}
+    ]
 
   def update(conn, %{"id" => id} = card_params) do
     card = Cards.get_card!(id)
@@ -43,6 +108,23 @@ defmodule LeitnerWeb.CardController do
       render(conn, :show, card: card)
     end
   end
+
+  operation :delete,
+    summary: "Delete a card",
+    description: "Deletes a card by its ID",
+    parameters: [
+      id: [
+        in: :path,
+        description: "Card ID",
+        type: :string,
+        required: true,
+        example: "123e4567-e89b-12d3-a456-426614174000"
+      ]
+    ],
+    responses: [
+      no_content: "Card successfully deleted",
+      not_found: {"Error message", "application/json", nil}
+    ]
 
   def delete(conn, %{"id" => id}) do
     case Cards.get_card(id) do
@@ -55,6 +137,27 @@ defmodule LeitnerWeb.CardController do
         end
     end
   end
+
+  operation :answer,
+    summary: "Answer a card",
+    description:
+      "Marks a card as answered and updates its category based on whether the answer was valid",
+    parameters: [
+      id: [
+        in: :path,
+        description: "Card ID",
+        type: :string,
+        required: true,
+        example: "123e4567-e89b-12d3-a456-426614174000"
+      ],
+      isValid: [in: :query, description: "Validity of the answer", type: :boolean, required: true]
+    ],
+    responses: [
+      no_content: "Card category updated successfully",
+      not_found: {"Error message", "application/json", nil},
+      bad_request: {"Error message", "application/json", nil},
+      internal_server_error: {"Error message", "application/json", nil}
+    ]
 
   def answer(conn, %{"id" => id, "isValid" => _is_valid}) do
     case Cards.get_card(id) do
