@@ -29,6 +29,9 @@ config :leitner, LeitnerWeb.Endpoint,
     tailwind: {Tailwind, :install_and_run, [:leitner, ~w(--watch)]}
   ]
 
+# In development, to ensure the rendered spec is refreshed
+config :open_api_spex, :cache_adapter, OpenApiSpex.Plug.NoneCache
+
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed

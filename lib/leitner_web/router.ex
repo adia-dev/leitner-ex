@@ -15,19 +15,24 @@ defmodule LeitnerWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug OpenApiSpex.Plug.PutApiSpec, module: LeitnerWeb.ApiSpec
   end
 
-  scope "/", LeitnerWeb do
+  scope "/" do
     pipe_through :browser
 
-    live "/cards", CardLive.Index, :index
+    live "/cards", LeitnerWeb.CardLive.Index, :index
+
+    get "/swaggerui", OpenApiSpex.Plug.SwaggerUI, path: "/api/openapi"
   end
 
   # Other scopes may use custom stacks.
-  scope "/api", LeitnerWeb do
+  scope "/api" do
     pipe_through :api
-    resources "/cards", CardController, except: [:new, :edit]
-    put "/cards/:id/answer", CardController, :answer
+    resources "/cards", LeitnerWeb.CardController, except: [:new, :edit]
+    patch "/cards/:id/answer", LeitnerWeb.CardController, :answer
+
+    get "/openapi", OpenApiSpex.Plug.RenderSpec, []
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
