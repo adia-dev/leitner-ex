@@ -165,15 +165,20 @@ defmodule LeitnerWeb.CardController do
       internal_server_error: {"Error message", "application/json", nil}
     ]
 
-  def answer(conn, %{"id" => id, "isValid" => _is_valid}) do
+  def answer(conn, %{"id" => id, "isValid" => is_valid}) when is_boolean(is_valid) do
     case Cards.get_card(id) do
       nil ->
         send_resp(conn, :not_found, "No card found related with the id: #{id}")
 
       card ->
-        next_category = Card.next_category(card.category)
+        new_category =
+          if is_valid do
+            Card.next_category(card.category)
+          else
+            :first
+          end
 
-        case Cards.update_card(card, %{category: next_category}) do
+        case Cards.update_card(card, %{category: new_category}) do
           {:ok, _card} ->
             send_resp(conn, :no_content, "")
 

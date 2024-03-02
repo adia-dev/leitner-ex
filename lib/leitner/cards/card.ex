@@ -10,7 +10,7 @@ defmodule Leitner.Cards.Card do
     field :tag, :string
 
     field :category, Ecto.Enum,
-      values: [:first, :second, :third, :fourth, :fifth, :sixth, :seventh, :done]
+      values: [:first, :second, :third, :fourth, :fifth, :sixth, :seventh, :done], default: :first
 
     field :question, :string
     field :answer, :string
