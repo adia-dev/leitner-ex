@@ -3,7 +3,6 @@ defmodule LeitnerWeb.CardController do
   use OpenApiSpex.ControllerSpecs
 
   alias LeitnerWeb.Schemas.CardAnswerRequest
-  alias OpenApiSpex.Schema
   alias LeitnerWeb.Schemas.CardUpdateRequest
   alias LeitnerWeb.Schemas.CardCreateRequest
   alias LeitnerWeb.Schemas.CardResponse
@@ -54,11 +53,22 @@ defmodule LeitnerWeb.CardController do
     ]
 
   def create(conn, card_params) do
-    with {:ok, %Card{} = card} <- Cards.create_card(card_params) do
+    card_changeset = Card.changeset(%Card{}, card_params)
+
+    if card_changeset.valid? do
+      case Cards.create_card(card_params) do
+        {:ok, card} ->
+          conn
+          |> put_status(:created)
+          |> render(:show, card: card)
+
+        {:error, _} ->
+          conn
+          |> put_status(:internal_server_error)
+      end
+    else
       conn
-      |> put_status(:created)
-      |> put_resp_header("location", ~p"/cards/#{card}")
-      |> render(:show, card: card)
+      |> send_resp(:bad_request, "Incorrect request payload")
     end
   end
 
@@ -180,7 +190,11 @@ defmodule LeitnerWeb.CardController do
 
         next_answer_date = calculate_next_answer_date(card)
 
-        case Cards.update_card(card, %{category: new_category, next_answer_date: next_answer_date, last_answered: DateTime.utc_now()}) do
+        case Cards.update_card(card, %{
+               category: new_category,
+               next_answer_date: next_answer_date,
+               last_answered: DateTime.utc_now()
+             }) do
           {:ok, _card} ->
             send_resp(conn, :no_content, "")
 
@@ -192,6 +206,64 @@ defmodule LeitnerWeb.CardController do
 
   def answer(conn, _params),
     do: send_resp(conn, :bad_request, "Incorrect request payload")
+
+  operation :quizz,
+    summary: "Get a quizz",
+    description: "Fetches a quizz of cards, optionally filtered by date",
+    parameters: [
+      date: [
+        in: :query,
+        description: "Date to filter by",
+        type: :string,
+        required: false,
+        example: "2021-01-01"
+      ]
+    ],
+    responses: [
+      ok: {"Quizz of cards", "application/json", [CardResponse]},
+      bad_request: {"Error message", "application/json", nil}
+    ]
+
+  def quizz(conn, %{"date" => date}) when is_bitstring(date) do
+    if Regex.match?(~r/\d{4}-\d{2}-\d{2}/, date) do
+      case Date.from_iso8601(date) do
+        {:ok, date} ->
+          date = NaiveDateTime.new!(date, ~T[00:00:00])
+          cards = Cards.list_cards_by_date(date)
+
+          render(conn, :index, cards: cards)
+
+        {:error, _} ->
+          send_resp(
+            conn,
+            :bad_request,
+            "Incorrect request payload expected date in format YYYY-MM-DD"
+          )
+      end
+    else
+      send_resp(
+        conn,
+        :bad_request,
+        "Incorrect request payload expected date in format YYYY-MM-DD"
+      )
+    end
+  end
+
+  def quizz(conn, %{"date" => date}) do
+    case date do
+      nil ->
+        send_resp(
+          conn,
+          :bad_request,
+          "Incorrect request payload expected date in format YYYY-MM-DD"
+        )
+
+      date ->
+        cards = Cards.list_cards_by_date(date)
+
+        render(conn, :quizz, cards: cards)
+    end
+  end
 
   @doc """
   Calculates the next date a card can be answered based on its category and last_answered date.

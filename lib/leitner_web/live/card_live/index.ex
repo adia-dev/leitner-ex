@@ -54,7 +54,7 @@ defmodule LeitnerWeb.CardLive.Index do
   defp apply_action(socket, :new, _params) do
     socket
     |> assign(:page_title, "New Card")
-    |> assign(:card, %Card{})
+    |> assign(:card, %Card{category: :first})
   end
 
   defp apply_action(socket, :index, _params) do

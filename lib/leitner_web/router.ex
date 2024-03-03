@@ -14,6 +14,7 @@ defmodule LeitnerWeb.Router do
   end
 
   pipeline :api do
+    plug CORSPlug
     plug :accepts, ["json"]
     plug OpenApiSpex.Plug.PutApiSpec, module: LeitnerWeb.ApiSpec
   end
@@ -29,8 +30,9 @@ defmodule LeitnerWeb.Router do
   # Other scopes may use custom stacks.
   scope "/api" do
     pipe_through :api
-    resources "/cards", LeitnerWeb.CardController, except: [:new, :edit]
+    get "/cards/quizz", LeitnerWeb.CardController, :quizz
     patch "/cards/:id/answer", LeitnerWeb.CardController, :answer
+    resources "/cards", LeitnerWeb.CardController, except: [:new, :edit]
 
     get "/openapi", OpenApiSpex.Plug.RenderSpec, []
   end

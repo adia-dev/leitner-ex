@@ -23,6 +23,14 @@ defmodule Leitner.Cards do
     Repo.all(Card)
   end
 
+  def list_cards_by_date(date) do
+    query =
+      from c in Card,
+        where: fragment("date_trunc('day', ?) = ?", c.next_answer_date, ^date)
+
+    Repo.all(query)
+  end
+
   def list_cards_by_category do
     query =
       from c in Card,

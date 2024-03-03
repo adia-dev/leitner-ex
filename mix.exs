@@ -62,7 +62,8 @@ defmodule Leitner.MixProject do
       {:credo, "~> 1.6", only: [:test, :dev], runtime: false},
       {:open_api_spex, "~> 3.18"},
       {:httpoison, "~> 2.0"},
-      {:poison, "~> 5.0"}
+      {:poison, "~> 5.0"},
+      {:cors_plug, "~> 3.0"}
     ]
   end
 

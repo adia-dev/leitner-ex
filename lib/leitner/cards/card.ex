@@ -26,8 +26,17 @@ defmodule Leitner.Cards.Card do
   @doc false
   def changeset(card, attrs) do
     card
-    |> cast(attrs, [:category, :question, :answer, :tag, :last_answered, :next_answer_date])
-    |> validate_required([:question, :answer])
+    |> cast(attrs, [
+      :category,
+      :question,
+      :answer,
+      :tag,
+      :last_answered,
+      :next_answer_date,
+      :category
+    ])
+    |> validate_inclusion(:category, @categories)
+    |> validate_required([:question, :answer, :category])
   end
 
   def next_category(:done), do: :done
