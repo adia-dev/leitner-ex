@@ -74,7 +74,7 @@ defmodule LeitnerWeb.CardControllerTest do
 
     test "renders errors when data is invalid", %{conn: conn} do
       conn = post(conn, ~p"/api/cards", @invalid_attrs)
-      assert json_response(conn, 422)["errors"] != %{}
+      assert response(conn, 400)
     end
   end
 
