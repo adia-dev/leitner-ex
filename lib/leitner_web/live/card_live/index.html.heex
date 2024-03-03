@@ -7,33 +7,50 @@
   </:actions>
 </.header>
 
-<.table
-  id="cards"
-  rows={@streams.cards}
-  row_click={fn {_id, card} -> JS.navigate(~p"/cards/#{card}") end}
->
-  <:col :let={{_id, card}} label="Category"><%= card.category %></:col>
-  <:col :let={{_id, card}} label="Question"><%= card.question %></:col>
-  <:col :let={{_id, card}} label="Answer"><%= card.answer %></:col>
-  <:col :let={{_id, card}} label="Tag"><%= card.tag %></:col>
-  <:action :let={{_id, card}}>
-    <.link navigate={~p"/cards/#{card}/answer"}>Answer</.link>
-  </:action>
-  <:action :let={{_id, card}}>
-    <div class="sr-only">
-      <.link navigate={~p"/cards/#{card}"}>Show</.link>
+<.cards_list :let={card} id="cards-list" cards={@streams.cards}>
+  <div class="h-full border-[1px] rounded-2xl overflow-hidden duration-300 ease-in-out hover:bg-gray-100 cursor-pointer">
+    <div class="p-6">
+      <div class="w-full flex items-center justify-between">
+        <h2 class="tracking-widest text-xs title-font font-medium text-gray-500 mb-1">
+          <.category category={card.category} />
+        </h2>
+        <h2 class="text-red-500">
+          <.link
+            phx-click={JS.push("delete", value: %{id: card.id}) |> hide("##{card.id}")}
+            data-confirm="Are you sure?"
+          >
+            <.icon name="hero-trash" />
+          </.link>
+        </h2>
+      </div>
+      <h1 class="title-font text-lg font-medium text-gray-900 mb-3"><%= card.question %></h1>
+      <div class="flex items-center flex-wrap ">
+        <.link
+          navigate={~p"/cards/#{card}/answer"}
+          class="font-semibold text-brand hover:underline pr-2"
+        >
+          Answer
+        </.link>
+        <.link
+          navigate={~p"/cards/#{card}/edit"}
+          class="font-semibold text-blue-500 hover:underline"
+        >
+          Edit
+        </.link>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-gray-400 text-sm">
+          <.icon name="hero-clock" />
+          <span>22h</span>
+        </span>
+        <span class="text-gray-400 text-sm">
+          <.icon name="hero-tag" />
+          <%= card.tag %>
+        </span>
+      </div>
     </div>
-    <.link patch={~p"/cards/#{card}/edit"}>Edit</.link>
-  </:action>
-  <:action :let={{id, card}}>
-    <.link
-      phx-click={JS.push("delete", value: %{id: card.id}) |> hide("##{id}")}
-      data-confirm="Are you sure?"
-    >
-      Delete
-    </.link>
-  </:action>
-</.table>
+  </div>
+</.cards_list>
 
 <.modal :if={@live_action in [:new, :edit]} id="card-modal" show on_cancel={JS.patch(~p"/cards")}>
   <.live_component

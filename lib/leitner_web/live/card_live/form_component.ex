@@ -26,8 +26,8 @@ defmodule LeitnerWeb.CardLive.FormComponent do
           prompt="Choose a value"
           options={Ecto.Enum.values(Leitner.Cards.Card, :category)}
         />
-        <.input field={@form[:question]} type="text" label="Question" />
-        <.input field={@form[:answer]} type="text" label="Answer" />
+        <.input field={@form[:question]} type="textarea" label="Question" />
+        <.input field={@form[:answer]} type="textarea" label="Answer" />
         <.input field={@form[:tag]} type="text" label="Tag" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Card</.button>

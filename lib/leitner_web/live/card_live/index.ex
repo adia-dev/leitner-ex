@@ -2,7 +2,6 @@ defmodule LeitnerWeb.CardLive.Index do
   alias LeitnerWeb.Clients.Cards.ApiClient
   use LeitnerWeb, :live_view
 
-  alias Leitner.Cards
   alias Leitner.Cards.Card
 
   @impl true
@@ -15,7 +14,11 @@ defmodule LeitnerWeb.CardLive.Index do
   def mount(%{"tags" => tags}, _session, socket) when is_bitstring(tags) do
     case ApiClient.list_cards(tags) do
       {:ok, cards} ->
-        {:ok, stream(socket, :cards, cards)}
+        all_tags =
+          Enum.map(cards, &(Atom.to_string(&1.category) |> String.capitalize()))
+          |> Enum.uniq()
+
+        {:ok, stream(socket, :cards, cards) |> assign(:all_tags, all_tags)}
 
       {:error, _reason} ->
         {:ok, stream(socket, :cards, [])}
@@ -26,7 +29,11 @@ defmodule LeitnerWeb.CardLive.Index do
   def mount(_params, _session, socket) do
     case ApiClient.list_cards() do
       {:ok, cards} ->
-        {:ok, stream(socket, :cards, cards)}
+        all_tags =
+          Enum.map(cards, &(&1.category |> String.capitalize()))
+          |> Enum.uniq()
+
+        {:ok, stream(socket, :cards, cards) |> assign(:all_tags, all_tags)}
 
       {:error, _reason} ->
         {:ok, stream(socket, :cards, [])}
@@ -78,5 +85,45 @@ defmodule LeitnerWeb.CardLive.Index do
     {:ok, _} = ApiClient.delete_card(card.id)
 
     {:noreply, stream_delete(socket, :cards, card)}
+  end
+
+  defp format_category(category) when is_atom(category), do: category
+  defp format_category(category), do: String.downcase(category) |> String.to_atom()
+
+  defp category(assigns) do
+    ~H"""
+    <%= case format_category(@category) do %>
+      <% :first -> %>
+        <span class="text-red-500">🔥</span>
+      <% :second -> %>
+        <span class="text-red-500">🔥🔥</span>
+      <% :third -> %>
+        <span class="text-red-500">🔥🔥🔥</span>
+      <% :fourth -> %>
+        <span class="text-red-500">🔥🔥🔥🔥</span>
+      <% :fifth -> %>
+        <span class="text-red-500">🔥🔥🔥🔥🔥</span>
+      <% :sixth -> %>
+        <span class="text-red-500">🔥🔥🔥🔥🔥🔥</span>
+      <% :seventh -> %>
+        <span class="text-red-500">🔥🔥🔥🔥🔥🔥🔥</span>
+      <% :done -> %>
+        <span class="text-green-500">✅</span>
+      <% _ -> %>
+        <span class="text-green-500"></span>
+    <% end %>
+    """
+  end
+
+  def cards_list(assigns) do
+    ~H"""
+    <div id={@id} class="flex flex-wrap -m-4" phx-update="stream">
+      <%= for {card_id, card} <- @cards do %>
+        <div id={card_id} class="p-4 md:w-1/2 lg:w-1/2 mt-5">
+          <%= render_slot(@inner_block, card) %>
+        </div>
+      <% end %>
+    </div>
+    """
   end
 end
