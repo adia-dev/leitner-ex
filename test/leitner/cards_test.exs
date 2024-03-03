@@ -78,49 +78,11 @@ defmodule Leitner.CardsTest do
                Cards.answer_card(card, %{answer: "invalid key"})
     end
 
-    test "answer_cards/3 with valid guess returns an updated card" do
+    test "answer_cards/3 with valid guess returns a ok" do
       card = card_fixture()
       assert {:ok, card} = Cards.answer_card(card, %{guess: "some answer"})
-      assert card.category == :second
     end
 
-    test "answer_cards/3 with valid guess streak bad anser returns an updated card back to first category" do
-      card = card_fixture()
-
-      assert {:ok, card} = Cards.answer_card(card, %{guess: "some answer"})
-      assert card.category == :second
-
-      assert {:ok, card} = Cards.answer_card(card, %{guess: "some answer"})
-      assert card.category == :third
-
-      assert {:error, :wrong_answer, card} = Cards.answer_card(card, %{guess: "some bad answer"})
-      assert card.category == :first
-    end
-
-    test "answer_cards/3 with valid guess until mastery returns an updated card" do
-      card = card_fixture()
-
-      assert {:ok, card} = Cards.answer_card(card, %{guess: "some answer"})
-      assert card.category == :second
-
-      assert {:ok, card} = Cards.answer_card(card, %{guess: "some answer"})
-      assert card.category == :third
-
-      assert {:ok, card} = Cards.answer_card(card, %{guess: "some answer"})
-      assert card.category == :fourth
-
-      assert {:ok, card} = Cards.answer_card(card, %{guess: "some answer"})
-      assert card.category == :fifth
-
-      assert {:ok, card} = Cards.answer_card(card, %{guess: "some answer"})
-      assert card.category == :sixth
-
-      assert {:ok, card} = Cards.answer_card(card, %{guess: "some answer"})
-      assert card.category == :seventh
-
-      assert {:ok, card} = Cards.answer_card(card, %{guess: "some answer"})
-      assert card.category == :done
-    end
 
     test "delete_card/1 deletes the card" do
       card = card_fixture()

@@ -29,7 +29,7 @@ defmodule LeitnerWeb.UserResetPasswordLiveTest do
 
       assert to == %{
                flash: %{"error" => "Reset password link is invalid or it has expired."},
-               to: ~p"/"
+               to: ~p"/cards"
              }
     end
   end

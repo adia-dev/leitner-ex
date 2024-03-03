@@ -45,6 +45,6 @@ defmodule LeitnerWeb.UserForgotPasswordLive do
     {:noreply,
      socket
      |> put_flash(:info, info)
-     |> redirect(to: ~p"/")}
+     |> redirect(to: ~p"/cards")}
   end
 end

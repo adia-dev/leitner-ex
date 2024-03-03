@@ -15,10 +15,10 @@ defmodule LeitnerWeb.UserSessionControllerTest do
         })
 
       assert get_session(conn, :user_token)
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/cards"
 
       # Now do a logged in request and assert on the menu
-      conn = get(conn, ~p"/")
+      conn = get(conn, ~p"/cards")
       response = html_response(conn, 200)
       assert response =~ user.email
       assert response =~ ~p"/users/settings"
@@ -36,7 +36,7 @@ defmodule LeitnerWeb.UserSessionControllerTest do
         })
 
       assert conn.resp_cookies["_leitner_web_user_remember_me"]
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/cards"
     end
 
     test "logs the user in with return to", %{conn: conn, user: user} do
@@ -65,7 +65,7 @@ defmodule LeitnerWeb.UserSessionControllerTest do
           }
         })
 
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/cards"
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Account created successfully"
     end
 
@@ -98,14 +98,14 @@ defmodule LeitnerWeb.UserSessionControllerTest do
   describe "DELETE /users/log_out" do
     test "logs the user out", %{conn: conn, user: user} do
       conn = conn |> log_in_user(user) |> delete(~p"/users/log_out")
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/cards"
       refute get_session(conn, :user_token)
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Logged out successfully"
     end
 
     test "succeeds even if the user is not logged in", %{conn: conn} do
       conn = delete(conn, ~p"/users/log_out")
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/cards"
       refute get_session(conn, :user_token)
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Logged out successfully"
     end
