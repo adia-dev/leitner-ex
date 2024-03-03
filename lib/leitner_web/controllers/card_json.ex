@@ -22,7 +22,9 @@ defmodule LeitnerWeb.CardJSON do
       tag: card.tag,
       category: Atom.to_string(card.category) |> String.upcase(),
       question: card.question,
-      answer: card.answer
+      answer: card.answer,
+      next_answer_date: card.next_answer_date,
+      last_answered: card.last_answered,
     }
   end
 end

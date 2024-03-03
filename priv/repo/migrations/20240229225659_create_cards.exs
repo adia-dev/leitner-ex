@@ -7,6 +7,8 @@ defmodule Leitner.Repo.Migrations.CreateCards do
       add :category, :string
       add :question, :string
       add :answer, :string
+      add :next_answer_date, :utc_datetime
+      add :last_answered, :utc_datetime
       add :tag, :string
 
       timestamps(type: :utc_datetime)

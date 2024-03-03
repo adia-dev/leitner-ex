@@ -9,7 +9,7 @@ defmodule LeitnerWeb.CardLive.FormComponent do
     <div>
       <.header>
         <%= @title %>
-        <:subtitle>Use this form to manage card records in your database.</:subtitle>
+        <:subtitle>Add a card to your Leitner cards set.</:subtitle>
       </.header>
 
       <.simple_form
@@ -19,13 +19,6 @@ defmodule LeitnerWeb.CardLive.FormComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <.input
-          field={@form[:category]}
-          type="select"
-          label="Category"
-          prompt="Choose a value"
-          options={Ecto.Enum.values(Leitner.Cards.Card, :category)}
-        />
         <.input field={@form[:question]} type="textarea" label="Question" />
         <.input field={@form[:answer]} type="textarea" label="Answer" />
         <.input field={@form[:tag]} type="text" label="Tag" />

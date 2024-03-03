@@ -4,10 +4,17 @@
     <.link patch={~p"/cards/new"}>
       <.button>New Card</.button>
     </.link>
+    <button phx-click="toggle_ready_to_answer">
+      <%= if @show_ready_to_answer, do: "Show All Cards", else: "Show Ready to Answer" %>
+    </button>
   </:actions>
 </.header>
 
-<.cards_list :let={card} id="cards-list" cards={@streams.cards}>
+<.cards_list
+  :let={card}
+  id="cards-list"
+  cards={@streams.cards}
+>
   <div class="h-full border-[1px] rounded-2xl overflow-hidden duration-300 ease-in-out hover:bg-gray-100 cursor-pointer">
     <div class="p-6">
       <div class="w-full flex items-center justify-between">
@@ -25,12 +32,14 @@
       </div>
       <h1 class="title-font text-lg font-medium text-gray-900 mb-3"><%= card.question %></h1>
       <div class="flex items-center flex-wrap ">
-        <.link
-          navigate={~p"/cards/#{card}/answer"}
-          class="font-semibold text-brand hover:underline pr-2"
-        >
-          Answer
-        </.link>
+        <%= if card.category != :done and card.category != "DONE" do %>
+          <.link
+            navigate={~p"/cards/#{card}/answer"}
+            class="font-semibold text-brand hover:underline pr-2"
+          >
+            Answer
+          </.link>
+        <% end %>
         <.link
           navigate={~p"/cards/#{card}/edit"}
           class="font-semibold text-blue-500 hover:underline"
@@ -40,8 +49,14 @@
       </div>
       <div class="flex items-center justify-between">
         <span class="text-gray-400 text-sm">
-          <.icon name="hero-clock" />
-          <span>22h</span>
+          <span class="text-gray-400 text-sm">
+            <%= if card.category != :done and card.category != "DONE" do %>
+              <.icon name="hero-clock" />
+              <%= format_time_until_next_answer(card.next_answer_date) %>
+            <% else %>
+              <.icon name="hero-check" class="text-green-500" />
+            <% end %>
+          </span>
         </span>
         <span class="text-gray-400 text-sm">
           <.icon name="hero-tag" />

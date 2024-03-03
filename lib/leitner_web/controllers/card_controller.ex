@@ -178,7 +178,9 @@ defmodule LeitnerWeb.CardController do
             :first
           end
 
-        case Cards.update_card(card, %{category: new_category}) do
+        next_answer_date = calculate_next_answer_date(card)
+
+        case Cards.update_card(card, %{category: new_category, next_answer_date: next_answer_date, last_answered: DateTime.utc_now()}) do
           {:ok, _card} ->
             send_resp(conn, :no_content, "")
 
@@ -190,4 +192,38 @@ defmodule LeitnerWeb.CardController do
 
   def answer(conn, _params),
     do: send_resp(conn, :bad_request, "Incorrect request payload")
+
+  @doc """
+  Calculates the next date a card can be answered based on its category and last_answered date.
+
+  ## Parameters
+
+  - card: The card to calculate the next answer date for.
+  """
+  def calculate_next_answer_date(%Card{category: category, last_answered: last_answered}) do
+    delay_days = category_to_delay_days(category)
+
+    last_answered =
+      if is_nil(last_answered) do
+        DateTime.utc_now()
+      else
+        last_answered
+      end
+
+    next_answer_date = DateTime.add(last_answered, delay_days * 86_400, :second)
+    next_answer_date
+  end
+
+  defp category_to_delay_days(category) do
+    case category do
+      :first -> 1
+      :second -> 2
+      :third -> 4
+      :fourth -> 8
+      :fifth -> 16
+      :sixth -> 32
+      :seventh -> 64
+      :done -> 0
+    end
+  end
 end

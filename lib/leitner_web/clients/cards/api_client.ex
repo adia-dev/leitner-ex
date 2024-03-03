@@ -22,7 +22,7 @@ defmodule LeitnerWeb.Clients.Cards.ApiClient do
   def list_cards(tag \\ nil) do
     url =
       (@api_base_url <> get_endpoint(:list))
-      |> maybe_add_query_param("tag", tag)
+      |> maybe_add_query_param("tags", tag)
 
     HTTPoison.get(url)
     |> handle_response(as: [%Card{}])
@@ -43,15 +43,29 @@ defmodule LeitnerWeb.Clients.Cards.ApiClient do
   def create_card(attrs) do
     url = "#{@api_base_url}#{@endpoints[:create]}"
 
-    HTTPoison.post(url, Poison.encode!(attrs))
+    HTTPoison.post(url, Poison.encode!(attrs), [{"content-type", "application/json"}])
     |> handle_response(as: %Card{})
   end
 
   def update_card(card_id, attrs) do
     url = "#{@api_base_url}/cards/#{card_id}"
 
-    HTTPoison.put(url, Poison.encode!(attrs))
+    HTTPoison.put(url, Poison.encode!(attrs), [{"content-type", "application/json"}])
     |> handle_response(as: %Card{})
+  end
+
+  def answer_card(card_id, true) do
+    url = "#{@api_base_url}/cards/#{card_id}/answer"
+
+    HTTPoison.patch(url, Poison.encode!(%{isValid: true}), [{"content-type", "application/json"}])
+    |> handle_response()
+  end
+
+  def answer_card(card_id, false) do
+    url = "#{@api_base_url}/cards/#{card_id}/answer"
+
+    HTTPoison.patch(url, Poison.encode!(%{isValid: false}), [{"content-type", "application/json"}])
+    |> handle_response()
   end
 
   def delete_card(card_id) do
@@ -119,6 +133,10 @@ defmodule LeitnerWeb.Clients.Cards.ApiClient do
     Logger.error("HTTP request failed: #{inspect(reason)}")
     {:error, reason}
   end
+
+  defp maybe_add_query_param(url, _name, []), do: url
+  defp maybe_add_query_param(url, _name, ""), do: url
+  defp maybe_add_query_param(url, _name, nil), do: url
 
   defp maybe_add_query_param(url, name, value) when is_list(value),
     do: url <> "?" <> name <> "=" <> Enum.join(value, ",")

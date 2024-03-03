@@ -1,5 +1,6 @@
 defmodule LeitnerWeb.CardLive.AnswerComponent do
   use LeitnerWeb, :live_component
+  alias LeitnerWeb.Clients.Cards.ApiClient
 
   alias Leitner.Cards
 
@@ -34,6 +35,30 @@ defmodule LeitnerWeb.CardLive.AnswerComponent do
         <:actions>
           <.button phx-disable-with="Answering...">Answer Card</.button>
         </:actions>
+        <%= if @reveal_card do %>
+          <p class={[
+            if(@valid_answer, do: "text-green-500", else: "text-red-500")
+          ]}>
+            Answer: <%= @card.answer %>
+          </p>
+          <.button
+            phx-click="validate_anyway"
+            type="button"
+            phx-target={@myself}
+            class="bg-red-500 hover:bg-red-600"
+          >
+            <.icon name="hero-exclamation-triangle" /> Force good answer
+          </.button>
+        <% else %>
+          <.button
+            phx-click="reveal_card"
+            type="button"
+            phx-target={@myself}
+            class="bg-red-500 hover:bg-red-600"
+          >
+            <.icon name="hero-exclamation-triangle" /> Reveal Card
+          </.button>
+        <% end %>
       </.simple_form>
     </div>
     """
@@ -46,6 +71,8 @@ defmodule LeitnerWeb.CardLive.AnswerComponent do
     {:ok,
      socket
      |> assign(assigns)
+     |> assign(:reveal_card, false)
+     |> assign(:valid_answer, false)
      |> assign_form(changeset)}
   end
 
@@ -59,27 +86,63 @@ defmodule LeitnerWeb.CardLive.AnswerComponent do
     {:noreply, assign_form(socket, changeset)}
   end
 
+  @impl true
+  def handle_event("validate", %{"card" => card_params}, socket) do
+    changeset =
+      socket.assigns.card
+      |> Cards.change_card(card_params)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign_form(socket, changeset)}
+  end
+
+  @impl true
+  def handle_event("reveal_card", _params, socket) do
+    {:noreply, assign(socket, :reveal_card, true)}
+  end
+
+  @impl true
+  def handle_event("validate_anyway", _params, socket) do
+    next_category =
+      Cards.Card.next_category(socket.assigns.card.category)
+
+    ApiClient.update_card(socket.assigns.card.id, %{category: next_category})
+
+    {:noreply,
+     socket
+     |> put_flash(:info, "Forced good answer !")
+     |> push_patch(to: socket.assigns.patch)}
+  end
+
+  @impl true
   def handle_event("guess", %{"card" => %{"guess" => guess}}, socket) do
     case Cards.answer_card(socket.assigns.card, %{guess: guess}) do
       {:ok, card} ->
         notify_parent({:answered, card})
 
+        ApiClient.answer_card(card.id, true)
+
         {:noreply,
          socket
-         |> put_flash(:info, "Good answer !!")
+         |> assign(:reveal_card, card.answer)
+         |> put_flash(:info, "Good answer !")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, :wrong_answer, card} ->
+        notify_parent({:answered, card})
+        ApiClient.answer_card(card.id, false)
+
         {:noreply,
          socket
          |> put_flash(:error, "Wrong answer...")
-         |> push_patch(to: socket.assigns.patch)}
+         |> assign(:show_good_answer, card.answer)
+         |> assign(:valid_answer, false)
+         |> assign(:reveal_card, true)}
 
       {:error, reason} ->
         {:noreply,
          socket
-         |> put_flash(:error, "Could not answer: #{reason}")
-         |> push_patch(to: socket.assigns.patch)}
+         |> put_flash(:error, "Could not answer: #{reason}")}
     end
   end
 

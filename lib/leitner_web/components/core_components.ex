@@ -442,6 +442,67 @@ defmodule LeitnerWeb.CoreComponents do
     """
   end
 
+  @doc """
+  Renders a login signup banner
+  """
+
+  attr :id, :string, default: "auth-banner"
+  attr :class, :string, default: nil
+  attr :show, :boolean, default: true
+
+  def auth_banner(%{show: false} = assigns),
+    do: ~H"""
+    <div></div>
+    """
+
+  def auth_banner(%{show: true} = assigns) do
+    ~H"""
+    <div
+      id={@id}
+      tabindex="-1"
+      class="fixed z-50 flex flex-col md:flex-row justify-between w-[calc(100%-2rem)] p-4 -translate-x-1/2 bg-white border border-gray-100 rounded-lg shadow-sm lg:max-w-7xl left-1/2 top-6 dark:bg-gray-700 dark:border-gray-600"
+    >
+      <div class="flex flex-col items-start mb-3 me-4 md:items-center md:flex-row md:mb-0">
+        <a
+          href="https://flowbite.com/"
+          class="flex items-center mb-2 border-gray-200 md:pe-4 md:me-4 md:border-e md:mb-0 dark:border-gray-600"
+        >
+          <img src="https://flowbite.com/docs/images/logo.svg" class="h-6 me-2" alt="Flowbite Logo" />
+          <span class="self-center text-lg font-semibold whitespace-nowrap dark:text-white">
+            Quizzip
+          </span>
+        </a>
+        <p class="flex items-center text-sm font-normal text-gray-500 dark:text-gray-400">
+          Get better and better with the Leitner method, enjoy more features by login in
+        </p>
+      </div>
+      <div class="flex items-center flex-shrink-0">
+        <.link
+          class="px-5 py-2 me-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+          href="/users/register"
+        >
+          Register
+        </.link>
+        <.link
+          class="px-5 py-2 me-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+          href="/users/log_in"
+        >
+          Log in
+        </.link>
+        <button
+          phx-click={hide("##{@id}")}
+          data-dismiss-target="#marketing-banner"
+          type="button"
+          class="flex-shrink-0 inline-flex justify-center w-7 h-7 items-center text-gray-400 hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 dark:hover:bg-gray-600 dark:hover:text-white"
+        >
+          <.icon name="hero-x-mark" class="w-3 h-3" />
+          <span class="sr-only">Close banner</span>
+        </button>
+      </div>
+    </div>
+    """
+  end
+
   @doc ~S"""
   Renders a table with generic styling.
 
